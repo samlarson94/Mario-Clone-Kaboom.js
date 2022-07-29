@@ -1,0 +1,5 @@
+body {
+    margin: 0;
+    /* Prevent screen from scrolling */
+    overflow: hidden; 
+}
