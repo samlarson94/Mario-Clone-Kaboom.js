@@ -45,7 +45,7 @@ scene("game", () => {
     const levelCfg = {
         width: 20, 
         height: 20, 
-        '=': [sprite('block', solid())],
+        '=': [sprite('block'), solid()],
         '$': [sprite('coin')],
         '%': [sprite('surprise'), solid(), 'coin-suprise'],
         '*': [sprite('surprise'), solid(), 'mushroom-surprise'],
@@ -59,6 +59,15 @@ scene("game", () => {
     }
 
     const gameLevel = addLevel(map, levelCfg)
+
+    const player = add([
+        sprite('mario'), solid(), 
+        // Starting Position
+        pos(30, 0),
+        // Body method will automatically add gravity
+        body(), 
+        origin('bot'),
+    ])
 
 });
 
