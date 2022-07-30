@@ -9,7 +9,7 @@ kaboom({
 })
 
 const MOVE_SPEED = 120;
-const JUMP_FORCE = 500;
+const JUMP_FORCE = 360;
 
 loadRoot('https://i.imgur.com/')
 loadSprite('coin', 'wbKxhcd.png')
@@ -64,6 +64,35 @@ scene("game", () => {
 
     const gameLevel = addLevel(map, levelCfg)
 
+    // Big Function
+    function big() {
+        let timer = 0
+        let isBig = false
+        return {
+            update() {
+                if (isBig) {
+                    timer -=dt()
+                    if (timer <= 0) {
+                        this.smallify()
+                    }
+                }
+            },
+            isBig() {
+                return isBig
+            },
+            smallify() {
+                this.scale = vec2(1)
+                timer = 0
+                isBig = false
+            },
+            biggify() {
+                this.scale = vec2(2)
+                timer = time
+                isBig = true
+            }
+        }
+    }
+
     const scoreLabel = add([
         text('test'),
         pos(30, 6),
@@ -82,6 +111,7 @@ scene("game", () => {
         // Body method will automatically add gravity
         body(), 
         origin('bot'),
+        big(),
     ])
 
    
