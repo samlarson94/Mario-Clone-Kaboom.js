@@ -8,6 +8,9 @@ kaboom({
     clearColor: [0, 0, 0, 1]
 })
 
+const MOVE_SPEED = 120;
+const JUMP_FORCE = 500;
+
 loadRoot('https://i.imgur.com/')
 loadSprite('coin', 'wbKxhcd.png')
 loadSprite('evil-shroom', 'KPO3fR9.png')
@@ -35,7 +38,7 @@ scene("game", () => {
         '                                                ',
         '                                                ',
         '                                                ',
-        '             %  =*=%=                           ',
+        '             %  =*=%=               =====       ',
         '                                                ',
         '                                                ',
         '                              -+                ',
@@ -80,6 +83,22 @@ scene("game", () => {
         body(), 
         origin('bot'),
     ])
+
+   
+    //Attach key events to player as event listeners
+    keyDown('left', () => {
+        player.move(-MOVE_SPEED, 0)
+    })
+
+    keyDown('right', () => {
+        player.move(MOVE_SPEED, 0)
+    })
+
+    keyDown('space', () => {
+        if(player.grounded()) {
+            player.jump(JUMP_FORCE)
+        }
+    })
 
 });
 
