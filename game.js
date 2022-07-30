@@ -4,7 +4,7 @@ kaboom({
     fullscreen: true,
     scale: 1,
     debug: true,
-    // Background
+    // Background - Add space image
     clearColor: [0, 0, 0, 1]
 })
 
@@ -13,7 +13,8 @@ loadSprite('coin', 'wbKxhcd.png')
 loadSprite('evil-shroom', 'KPO3fR9.png')
 loadSprite('brick', 'pogC9x5.png')
 loadSprite('block', 'M6rwarW.png')
-loadSprite('mario', 'Wb1qfhK.png')
+// Find Custom Astronaut Mario
+loadSprite('mario', 'Wb1qfhK.png') 
 loadSprite('mushroom', '0wMd92p.png')
 loadSprite('surprise', 'gesQ1KP.png')
 loadSprite('unboxed', 'bdrLpi6.png')
@@ -59,6 +60,17 @@ scene("game", () => {
     }
 
     const gameLevel = addLevel(map, levelCfg)
+
+    const scoreLabel = add([
+        text('test'),
+        pos(30, 6),
+        layer('ui'),
+        {
+            value: 'test',
+        }
+    ])
+
+    add([text('level ' + 'test', pos(4,6))])
 
     const player = add([
         sprite('mario'), solid(), 
