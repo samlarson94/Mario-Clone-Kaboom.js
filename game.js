@@ -12,6 +12,7 @@ const MOVE_SPEED = 120;
 const JUMP_FORCE = 380;
 const BIG_JUMP_FORCE = 550;
 let CURRENT_JUMP_FORCE = JUMP_FORCE;
+const 
 
 
 loadRoot('https://i.imgur.com/')
@@ -31,7 +32,7 @@ loadSprite('pipe-bottom-right', 'nqQ79eI.png')
 
 
 
-scene("game", () => {
+scene("game", ({ score }) => {
     //Add layers for background, obj, and ui
     layers(['bg', 'obj', 'ui'], 'obj')
 
@@ -100,11 +101,11 @@ scene("game", () => {
     }
 
     const scoreLabel = add([
-        text('test'),
+        text(score),
         pos(30, 6),
         layer('ui'),
         {
-            value: 'test',
+            value: score,
         }
     ])
 
@@ -191,8 +192,8 @@ scene("game", () => {
 });
 
 scene('lose', ({ score }) => {
-    add([text(score, 32), origin(center), pos(width()/2, height()/2)])
+    add([text(score, 32), origin('center'), pos(width()/2, height()/2)])
 });
 
 // Start Game
-start("game");
+start("game", { score: 0 });
