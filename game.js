@@ -10,6 +10,9 @@ kaboom({
 
 const MOVE_SPEED = 120;
 const JUMP_FORCE = 380;
+const BIG_JUMP_FORCE = 550;
+let CURRENT_JUMP_FORCE = JUMP_FORCE;
+
 
 loadRoot('https://i.imgur.com/')
 loadSprite('coin', 'wbKxhcd.png')
@@ -50,7 +53,7 @@ scene("game", () => {
         width: 20, 
         height: 20, 
         '=': [sprite('block'), solid()],
-        '$': [sprite('coin')],
+        '$': [sprite('coin'), 'coin'],
         '%': [sprite('surprise'), solid(), 'coin-suprise-box'],
         '*': [sprite('surprise'), solid(), 'mushroom-surprise'],
         '}': [sprite('unboxed'), solid()],
@@ -71,6 +74,7 @@ scene("game", () => {
         return {
             update() {
                 if (isBig) {
+                    CURRENT_JUMP_FORCE = BIG_JUMP_FORCE
                     timer -=dt()
                     if (timer <= 0) {
                         this.smallify()
@@ -82,11 +86,13 @@ scene("game", () => {
             },
             smallify() {
                 this.scale = vec2(1)
+                CURRENT_JUMP_FORCE = JUMP_FORCE
                 timer = 0
                 isBig = false
             },
             biggify() {
                 this.scale = vec2(2)
+                CURRENT_JUMP_FORCE = BIG_JUMP_FORCE
                 timer = time
                 isBig = true
             }
@@ -117,7 +123,7 @@ scene("game", () => {
 
     //Action for moving mushroom
     action('mushroom', (m) => {
-        m.move(10, 0)
+        m.move(20, 0)
     })
 
     //HeadBump
@@ -141,7 +147,21 @@ scene("game", () => {
             gameLevel.spawn('}', obj.gridPos.sub(0,0))
         }
     })
+
+    //Mario Eats Mushroom and Grows
+    player.collides('mushroom', (m) => {
+        destroy(m)
+        player.biggify(6)
+    })
+
+    //Mario Collects Coin
+    player.collides('coin', (c) => {
+        destroy(c)
+        scoreLabel.value++
+        scoreLabel.text = scoreLabel.value
+    })
    
+
     //Attach key events to player as event listeners
     keyDown('left', () => {
         player.move(-MOVE_SPEED, 0)
@@ -153,7 +173,7 @@ scene("game", () => {
 
     keyDown('space', () => {
         if(player.grounded()) {
-            player.jump(JUMP_FORCE)
+            player.jump(CURRENT_JUMP_FORCE)
         }
     })
 
