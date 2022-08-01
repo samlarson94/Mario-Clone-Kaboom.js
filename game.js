@@ -61,7 +61,7 @@ scene("game", () => {
         ')': [sprite('pipe-bottom-right'), solid(), scale(0.5)],
         '-': [sprite('pipe-top-left'), solid(), scale(0.5)],
         '+': [sprite('pipe-top-right'), solid(), scale(0.5)],
-        '^': [sprite('evil-shroom'), solid()],
+        '^': [sprite('evil-shroom'), solid(), 'dangerous'],
         '#': [sprite('mushroom'), solid(), 'mushroom', body()],
     }
 
@@ -126,6 +126,12 @@ scene("game", () => {
         m.move(20, 0)
     })
 
+    //Make evil mushrooms move
+    const ENEMY_SPEED = 20
+    action('dangerous', (d) => {
+        d.move(-ENEMY_SPEED, 0)
+    })
+
     //HeadBump
     player.on("headbump", (obj) => {
         //Add conditional for coin-suprise headbump
@@ -160,6 +166,11 @@ scene("game", () => {
         scoreLabel.value++
         scoreLabel.text = scoreLabel.value
     })
+
+    //Mario collides with Enemies
+    player.collides('dangerous', (d) => {
+        go('lose', { score: scoreLabel.value })
+    })
    
 
     //Attach key events to player as event listeners
@@ -177,6 +188,10 @@ scene("game", () => {
         }
     })
 
+});
+
+scene('lose', ({ score }) => {
+    add([text(score, 32), origin(center), pos(width()/2, height()/2)])
 });
 
 // Start Game
