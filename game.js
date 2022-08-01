@@ -9,7 +9,7 @@ kaboom({
 })
 
 const MOVE_SPEED = 120;
-const JUMP_FORCE = 360;
+const JUMP_FORCE = 380;
 
 loadRoot('https://i.imgur.com/')
 loadSprite('coin', 'wbKxhcd.png')
@@ -38,7 +38,7 @@ scene("game", () => {
         '                                                ',
         '                                                ',
         '                                                ',
-        '             %  =*=%=               =====       ',
+        '           %  =%  =*=%=               =====     ',
         '                                                ',
         '                                                ',
         '                              -+                ',
@@ -51,7 +51,7 @@ scene("game", () => {
         height: 20, 
         '=': [sprite('block'), solid()],
         '$': [sprite('coin')],
-        '%': [sprite('surprise'), solid(), 'coin-suprise'],
+        '%': [sprite('surprise'), solid(), 'coin-suprise-box'],
         '*': [sprite('surprise'), solid(), 'mushroom-surprise'],
         '}': [sprite('unboxed'), solid()],
         '(': [sprite('pipe-bottom-left'), solid(), scale(0.5)],
@@ -59,7 +59,7 @@ scene("game", () => {
         '-': [sprite('pipe-top-left'), solid(), scale(0.5)],
         '+': [sprite('pipe-top-right'), solid(), scale(0.5)],
         '^': [sprite('evil-shroom'), solid()],
-        '#': [sprite('mushroom')],
+        '#': [sprite('mushroom'), solid(), 'mushroom', body()],
     }
 
     const gameLevel = addLevel(map, levelCfg)
@@ -105,7 +105,8 @@ scene("game", () => {
     add([text('level ' + 'test', pos(4,6))])
 
     const player = add([
-        sprite('mario'), solid(), 
+        sprite('mario'), 
+        solid(), 
         // Starting Position
         pos(30, 0),
         // Body method will automatically add gravity
@@ -114,6 +115,32 @@ scene("game", () => {
         big(),
     ])
 
+    //Action for moving mushroom
+    action('mushroom', (m) => {
+        m.move(10, 0)
+    })
+
+    //HeadBump
+    player.on("headbump", (obj) => {
+        //Add conditional for coin-suprise headbump
+        if (obj.is('coin-suprise-box')) {
+            //Spawn coin right above object's position
+            gameLevel.spawn('$', obj.gridPos.sub(0,1))
+            //Destroy object
+            destroy(obj)
+            //Replace object with unboxed version of the surprise box
+            gameLevel.spawn('}', obj.gridPos.sub(0,0))
+        }
+        //Add conditional for mushroom-surprise headbump
+        if (obj.is('mushroom-surprise')) {
+            //Spawn shroom right above object's position
+            gameLevel.spawn('#', obj.gridPos.sub(0,1))
+            //Destroy object
+            destroy(obj)
+            //Replace object with unboxed version of the surprise box
+            gameLevel.spawn('}', obj.gridPos.sub(0,0))
+        }
+    })
    
     //Attach key events to player as event listeners
     keyDown('left', () => {
