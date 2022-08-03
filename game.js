@@ -13,6 +13,7 @@ const JUMP_FORCE = 380;
 const BIG_JUMP_FORCE = 550;
 let CURRENT_JUMP_FORCE = JUMP_FORCE;
 let isJumping = true;
+const FALL_DEATH = 400;
 
 
 loadRoot('https://i.imgur.com/')
@@ -177,6 +178,14 @@ scene("game", ({ score }) => {
         }
     })
    
+    player.action(() => {
+        //Put Camera on Player
+        camPos(player.pos)
+        //Establish "bottom"
+        if (player.pos.y >= FALL_DEATH) {
+            go('lose', { score: scoreLabel.value })
+        }
+    })
 
     //Attach key events to player as event listeners
     keyDown('left', () => {
