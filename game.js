@@ -33,7 +33,7 @@ loadSprite('pipe-bottom-right', 'nqQ79eI.png')
 
 
 
-scene("game", ({ score }) => {
+scene("game", ({ level, score }) => {
     //Add layers for background, obj, and ui
     layers(['bg', 'obj', 'ui'], 'obj')
 
@@ -61,8 +61,8 @@ scene("game", ({ score }) => {
         '}': [sprite('unboxed'), solid()],
         '(': [sprite('pipe-bottom-left'), solid(), scale(0.5)],
         ')': [sprite('pipe-bottom-right'), solid(), scale(0.5)],
-        '-': [sprite('pipe-top-left'), solid(), scale(0.5)],
-        '+': [sprite('pipe-top-right'), solid(), scale(0.5)],
+        '-': [sprite('pipe-top-left'), solid(), scale(0.5), 'pipe'],
+        '+': [sprite('pipe-top-right'), solid(), scale(0.5), 'pipe'],
         '^': [sprite('evil-shroom'), solid(), 'dangerous'],
         '#': [sprite('mushroom'), solid(), 'mushroom', body()],
     }
@@ -106,11 +106,11 @@ scene("game", ({ score }) => {
         pos(30, 6),
         layer('ui'),
         {
-            value: "FINAL SCORE:"  + " " + score,
+            value: score,
         }
     ])
 
-    add([text('level ' + 'test', pos(4,6))])
+    add([text('level ' + parseInt(level + 1)), pos(40,25)])
 
     const player = add([
         sprite('mario'), 
@@ -178,6 +178,7 @@ scene("game", ({ score }) => {
         }
     })
    
+    //Establish Camera Position and Bottom of Game
     player.action(() => {
         //Put Camera on Player
         camPos(player.pos)
@@ -185,6 +186,16 @@ scene("game", ({ score }) => {
         if (player.pos.y >= FALL_DEATH) {
             go('lose', { score: scoreLabel.value })
         }
+    })
+
+    // Transfer player and score to next level (Using Pipe)
+    player.collides('pipe', () => {
+        keyDown('down', () => {
+            go('game', {
+                level: level + 1,
+                score: scoreLabel.value,
+            })
+        })
     })
 
     //Attach key events to player as event listeners
@@ -216,4 +227,4 @@ scene('lose', ({ score }) => {
 });
 
 // Start Game
-start("game", { score: 0 });
+start("game", { level: 0, score: 0 });
