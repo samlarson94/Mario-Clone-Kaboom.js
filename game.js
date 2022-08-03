@@ -12,7 +12,7 @@ const MOVE_SPEED = 120;
 const JUMP_FORCE = 380;
 const BIG_JUMP_FORCE = 550;
 let CURRENT_JUMP_FORCE = JUMP_FORCE;
-const 
+let isJumping = true;
 
 
 loadRoot('https://i.imgur.com/')
@@ -101,11 +101,11 @@ scene("game", ({ score }) => {
     }
 
     const scoreLabel = add([
-        text(score),
+        text("SCORE: " + score),
         pos(30, 6),
         layer('ui'),
         {
-            value: score,
+            value: "FINAL SCORE:"  + " " + score,
         }
     ])
 
@@ -170,7 +170,11 @@ scene("game", ({ score }) => {
 
     //Mario collides with Enemies
     player.collides('dangerous', (d) => {
-        go('lose', { score: scoreLabel.value })
+        if (isJumping) {
+            destroy(d)
+        } else {
+            go('lose', { score: scoreLabel.value })
+        }
     })
    
 
@@ -183,8 +187,15 @@ scene("game", ({ score }) => {
         player.move(MOVE_SPEED, 0)
     })
 
+    player.action(() => {
+        if (player.grounded()) {
+            isJumping = false
+        }
+    })
+
     keyDown('space', () => {
         if(player.grounded()) {
+            isJumping = true
             player.jump(CURRENT_JUMP_FORCE)
         }
     })
