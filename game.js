@@ -31,25 +31,49 @@ loadSprite('pipe-top-right', 'hj2GK4n.png')
 loadSprite('pipe-bottom-left', 'c1cYSbt.png')
 loadSprite('pipe-bottom-right', 'nqQ79eI.png')
 
+//Blue Sprites
+loadSprite('blue-block', 'fVscIbn.png')
+loadSprite('blue-brick', '3e5YRQd.png')
+loadSprite('blue-steel', 'gqVoI2b.png')
+loadSprite('blue-evil-shroom', 'SvV4ueD.png')
+loadSprite('blue-surprise', 'RMqCc1G.png')
+loadSprite('blue-block', '3e5YRQd.png')
+loadSprite('blue-block', '3e5YRQd.png')
 
 
 scene("game", ({ level, score }) => {
     //Add layers for background, obj, and ui
     layers(['bg', 'obj', 'ui'], 'obj')
 
-    const map = [
+    const maps = [[
         '                                                ',
         '                                                ',
         '                                                ',
         '                                                ',
         '                                                ',
-        '           %  =%  =*=%=               =====     ',
+        '   ===        %  =%  =*=%=               =====  ',
         '                                                ',
         '                                                ',
         '                              -+                ',
         '                    *    ^  ^ ()                ',
         '=================================   ============',
-    ]
+    ],
+    [
+        's                                                       s',
+        's                                                       s',
+        's                                                       s',
+        's                                                       s',
+        's                                                       s',
+        's                                                       s',
+        's                                                       s',
+        's                                            /          s',
+        's         !@!       @!   !m!!              ///       -+ s',
+        's                                        /////       () s',
+        's                                       //////       () s',
+        's                          z   z  /    ///////       () s',
+        's!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  !!!!!!!!!!  !!!!!!!s',
+       
+    ]]
 
     const levelCfg = {
         width: 20, 
@@ -65,9 +89,16 @@ scene("game", ({ level, score }) => {
         '+': [sprite('pipe-top-right'), solid(), scale(0.5), 'pipe'],
         '^': [sprite('evil-shroom'), solid(), 'dangerous'],
         '#': [sprite('mushroom'), solid(), 'mushroom', body()],
+        '!': [sprite('blue-block'), solid(), scale(0.5)],
+        '/': [sprite('blue-brick'), solid(), scale(0.5)],
+        's': [sprite('blue-steel'), solid(), scale(0.5)],
+        '@': [sprite('blue-surprise'), solid(), scale(0.5), 'coin-surprise-box'],
+        'm': [sprite('blue-surprise'), solid(), scale(0.5), 'mushroom-surprise'],
+        'z': [sprite('blue-evil-shroom'), solid(), scale(0.5), 'dangerous'],
+
     }
 
-    const gameLevel = addLevel(map, levelCfg)
+    const gameLevel = addLevel(maps[level], levelCfg)
 
     // Big Function
     function big() {
