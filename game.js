@@ -1,11 +1,12 @@
 // Initialize Kaboom
+https://unsplash.com/photos/4dpAqfTbvKA
 kaboom({
     global: true,
     fullscreen: true,
     scale: 1,
     debug: true,
     // Background - Add space image
-    clearColor: [0, 0, 0, 1]
+    clearColor: [0, 0, 1, 2]
 })
 
 const MOVE_SPEED = 120;
@@ -78,10 +79,10 @@ scene("game", ({ level, score }) => {
     's                                                                                                      s',
     's                                                                                                      s',
     's                                                                                                      s',
+    's                                                                        @m                            s',
     's                                                                                                      s',
-    's                                                                      @m                              s',
-    's                                                                                                      s',
-    's                                                   @@              !!!!!!!                            s',
+    's                                                   @@                                                 s',
+    's                                                                 !!!!!!!                              s',
     's                                                          !!!!                                        s',
     's         !@!       @!   !m!!                      !!!!                                                s',
     's                                        /////                                                         s',
