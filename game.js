@@ -1,5 +1,5 @@
 // Initialize Kaboom
-https://unsplash.com/photos/4dpAqfTbvKA
+// https://unsplash.com/photos/4dpAqfTbvKA
 kaboom({
     global: true,
     fullscreen: true,
@@ -108,8 +108,8 @@ scene("game", ({ level, score }) => {
         '!': [sprite('blue-block'), solid(), scale(0.5)],
         '/': [sprite('blue-brick'), solid(), scale(0.5)],
         's': [sprite('blue-steel'), solid(), scale(0.5)],
-        '@': [sprite('blue-surprise'), solid(), scale(0.5), 'coin-surprise-box'],
-        'm': [sprite('blue-surprise'), solid(), scale(0.5), 'mushroom-surprise'],
+        '@': [sprite('blue-surprise'), solid(), scale(0.5), 'blue-coin-surprise-box'],
+        'm': [sprite('blue-surprise'), solid(), scale(0.5), 'blue-mushroom-surprise'],
         'z': [sprite('blue-evil-shroom'), solid(), scale(0.5), 'dangerous'],
 
     }
@@ -200,6 +200,23 @@ scene("game", ({ level, score }) => {
             destroy(obj)
             //Replace object with unboxed version of the surprise box
             gameLevel.spawn('}', obj.gridPos.sub(0,0))
+        }
+        //Adding conditionals for blue versions of coin and mushroom surprise boxes
+        if (obj.is('blue-coin-suprise-box')) {
+            //Spawn coin right above object's position
+            gameLevel.spawn('$', obj.gridPos.sub(0,1))
+            //Destroy object
+            destroy(obj)
+            //Replace object with unboxed version of the surprise box
+            gameLevel.spawn('/', obj.gridPos.sub(0,0))
+        }
+        if (obj.is('blue-mushroom-surprise')) {
+            //Spawn shroom right above object's position
+            gameLevel.spawn('#', obj.gridPos.sub(0,1))
+            //Destroy object
+            destroy(obj)
+            //Replace object with unboxed version of the surprise box
+            gameLevel.spawn('/', obj.gridPos.sub(0,0))
         }
     })
 
