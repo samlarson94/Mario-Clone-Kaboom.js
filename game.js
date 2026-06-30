@@ -1,13 +1,68 @@
-// Initialize Kaboom
-// https://unsplash.com/photos/4dpAqfTbvKA
+// Virtual key state — shared between touch buttons and the game loop
+const virtualKeys = { left: false, right: false, jump: false, down: false };
+let currentLevel = 0;
+
+// ── Window-exposed API (called from HTML buttons) ────────────────────────────
+window.startGame = (level) => {
+    currentLevel = level;
+    document.getElementById('title-screen').style.display      = 'none';
+    document.getElementById('game-over-screen').style.display  = 'none';
+    document.getElementById('warp-screen').style.display       = 'none';
+    document.getElementById('game-hud').style.display          = 'block';
+
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    document.getElementById('mobile-controls').style.display = isTouch ? 'flex' : 'none';
+
+    go('game', { level, score: 0 });
+};
+
+window.retryGame = () => {
+    document.getElementById('game-over-screen').style.display = 'none';
+    window.startGame(currentLevel);
+};
+
+window.goToTitle = () => {
+    document.getElementById('game-over-screen').style.display = 'none';
+    document.getElementById('game-hud').style.display         = 'none';
+    document.getElementById('mobile-controls').style.display  = 'none';
+    document.getElementById('title-screen').style.display     = 'flex';
+};
+
+window.openWarp = () => {
+    document.getElementById('warp-screen').style.display = 'flex';
+};
+
+window.closeWarp = () => {
+    document.getElementById('warp-screen').style.display = 'none';
+};
+
+// ── Touch / mouse binding for on-screen control buttons ──────────────────────
+function bindCtrlBtn(id, key) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const press   = (e) => { e.preventDefault(); virtualKeys[key] = true;  };
+    const release = (e) => { e.preventDefault(); virtualKeys[key] = false; };
+    el.addEventListener('touchstart',  press,   { passive: false });
+    el.addEventListener('touchend',    release, { passive: false });
+    el.addEventListener('touchcancel', release, { passive: false });
+    el.addEventListener('mousedown',   press);
+    el.addEventListener('mouseup',     release);
+    el.addEventListener('mouseleave',  release);
+}
+
+bindCtrlBtn('btn-left',  'left');
+bindCtrlBtn('btn-right', 'right');
+bindCtrlBtn('btn-down',  'down');
+bindCtrlBtn('btn-jump',  'jump');
+
+// ── Kaboom init ──────────────────────────────────────────────────────────────
 kaboom({
     global: true,
     fullscreen: true,
     scale: 1,
-    debug: true,
-    // Background - Add space image
-    clearColor: [0, 0, 1, 2]
-})
+    debug: false,
+    clearColor: [0, 0, 0.5, 1],
+});
 
 const MOVE_SPEED = 120;
 const JUMP_FORCE = 380;
@@ -16,87 +71,95 @@ let CURRENT_JUMP_FORCE = JUMP_FORCE;
 let isJumping = true;
 const FALL_DEATH = 400;
 
+loadRoot('https://i.imgur.com/');
+loadSprite('coin',              'wbKxhcd.png');
+loadSprite('evil-shroom',       'KPO3fR9.png');
+loadSprite('brick',             'pogC9x5.png');
+loadSprite('block',             'M6rwarW.png');
+loadSprite('mario',             'Wb1qfhK.png');
+loadSprite('mushroom',          '0wMd92p.png');
+loadSprite('surprise',          'gesQ1KP.png');
+loadSprite('unboxed',           'bdrLpi6.png');
+loadSprite('pipe-top-left',     'ReTPiWY.png');
+loadSprite('pipe-top-right',    'hj2GK4n.png');
+loadSprite('pipe-bottom-left',  'c1cYSbt.png');
+loadSprite('pipe-bottom-right', 'nqQ79eI.png');
+loadSprite('blue-block',        'fVscIbn.png');
+loadSprite('blue-brick',        '3e5YRQd.png');
+loadSprite('blue-steel',        'gqVoI2b.png');
+loadSprite('blue-evil-shroom',  'SvV4ueD.png');
+loadSprite('blue-surprise',     'RMqCc1G.png');
 
-loadRoot('https://i.imgur.com/')
-loadSprite('coin', 'wbKxhcd.png')
-loadSprite('evil-shroom', 'KPO3fR9.png')
-loadSprite('brick', 'pogC9x5.png')
-loadSprite('block', 'M6rwarW.png')
-// Find Custom Astronaut Mario
-loadSprite('mario', 'Wb1qfhK.png') 
-loadSprite('mushroom', '0wMd92p.png')
-loadSprite('surprise', 'gesQ1KP.png')
-loadSprite('unboxed', 'bdrLpi6.png')
-loadSprite('pipe-top-left', 'ReTPiWY.png')
-loadSprite('pipe-top-right', 'hj2GK4n.png')
-loadSprite('pipe-bottom-left', 'c1cYSbt.png')
-loadSprite('pipe-bottom-right', 'nqQ79eI.png')
+// ── Scenes ───────────────────────────────────────────────────────────────────
 
-//Blue Sprites
-loadSprite('blue-block', 'fVscIbn.png')
-loadSprite('blue-brick', '3e5YRQd.png')
-loadSprite('blue-steel', 'gqVoI2b.png')
-loadSprite('blue-evil-shroom', 'SvV4ueD.png')
-loadSprite('blue-surprise', 'RMqCc1G.png')
-loadSprite('blue-block', '3e5YRQd.png')
-loadSprite('blue-block', '3e5YRQd.png')
+// Menu scene: nothing rendered — the HTML title screen overlay covers the canvas
+scene('menu', () => {});
 
+scene('game', ({ level, score }) => {
+    currentLevel = level;
 
-scene("game", ({ level, score }) => {
-    //Add layers for background, obj, and ui
-    layers(['bg', 'obj', 'ui'], 'obj')
+    // Reset shared state on each scene entry
+    isJumping = true;
+    CURRENT_JUMP_FORCE = JUMP_FORCE;
+    Object.keys(virtualKeys).forEach((k) => { virtualKeys[k] = false; });
 
-    const maps = [[
-        '                                                ',
-        '                                                ',
-        '                                                ',
-        '                                                ',
-        '                                                ',
-        '   ===        %  =%  =*=%=               =====  ',
-        '                                                ',
-        '                                                ',
-        '                              -+                ',
-        '                    *    ^  ^ ()                ',
-        '=================================   ============',
-    ],
-    [
-        's                                                       s',
-        's                                                       s',
-        's                                                       s',
-        's                                                       s',
-        's                                                       s',
-        's                                                       s',
-        's                                                       s',
-        's                                            /          s',
-        's         !@!       @!   !m!!              ///       -+ s',
-        's                                        /////       () s',
-        's                                       //////       () s',
-        's                          z   z  /    ///////       () s',
-        's!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  !!!!!!!!!!  !!!!!!!s',
-       
-    ],
-    [   
-    's                                                                                                      s',
-    's                                                                                                      s',
-    's                                                                                                      s',
-    's                                                                        @m                            s',
-    's                                                                                                      s',
-    's                                                   @@                                                 s',
-    's                                                                 !!!!!!!                              s',
-    's                                                          !!!!                                        s',
-    's         !@!       @!   !m!!                      !!!!                                                s',
-    's                                        /////                                                         s',
-    's                                       //////                                                      -+ s',
-    's                          z   z  /    ///////                      z       z       z               () s',
-    's!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  !!!!!!!!!!    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!s',
-    ]]
+    layers(['bg', 'obj', 'ui'], 'obj');
+
+    const maps = [
+        // World 1-1
+        [
+            '                                                ',
+            '                                               ',
+            '                                               ',
+            '                                               ',
+            '                                               ',
+            '   ===        %  =%  =*=%=               =====  ',
+            '                                               ',
+            '                                               ',
+            '                              -+               ',
+            '                    *    ^  ^ ()               ',
+            '=================================   ============',
+        ],
+        // World 1-2
+        [
+            's                                                       s',
+            's                                                       s',
+            's                                                       s',
+            's                                                       s',
+            's                                                       s',
+            's                                                       s',
+            's                                                       s',
+            's                                            /          s',
+            's         !@!       @!   !m!!              ///       -+ s',
+            's                                        /////       () s',
+            's                                       //////       () s',
+            's                          z   z  /    ///////       () s',
+            's!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  !!!!!!!!!!  !!!!!!!s',
+        ],
+        // World 1-3
+        [
+            's                                                                                                      s',
+            's                                                                                                      s',
+            's                                                                                                      s',
+            's                                                                        @m                            s',
+            's                                                                                                      s',
+            's                                                   @@                                                 s',
+            's                                                                 !!!!!!!                              s',
+            's                                                          !!!!                                        s',
+            's         !@!       @!   !m!!                      !!!!                                                s',
+            's                                        /////                                                         s',
+            's                                       //////                                                      -+ s',
+            's                          z   z  /    ///////                      z       z       z               () s',
+            's!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  !!!!!!!!!!    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!s',
+        ],
+    ];
 
     const levelCfg = {
-        width: 20, 
-        height: 20, 
+        width: 20,
+        height: 20,
         '=': [sprite('block'), solid()],
         '$': [sprite('coin'), 'coin'],
-        '%': [sprite('surprise'), solid(), 'coin-suprise-box'],
+        '%': [sprite('surprise'), solid(), 'coin-surprise-box'],
         '*': [sprite('surprise'), solid(), 'mushroom-surprise'],
         '}': [sprite('unboxed'), solid()],
         '(': [sprite('pipe-bottom-left'), solid(), scale(0.5)],
@@ -111,184 +174,169 @@ scene("game", ({ level, score }) => {
         '@': [sprite('blue-surprise'), solid(), scale(0.5), 'blue-coin-surprise-box'],
         'm': [sprite('blue-surprise'), solid(), scale(0.5), 'blue-mushroom-surprise'],
         'z': [sprite('blue-evil-shroom'), solid(), scale(0.5), 'dangerous'],
+    };
 
-    }
+    const gameLevel = addLevel(maps[level], levelCfg);
 
-    const gameLevel = addLevel(maps[level], levelCfg)
-
-    // Big Function
+    // Power-up component — manages big/small state with a proper countdown timer
     function big() {
-        let timer = 0
-        let isBig = false
+        let timer = 0;
+        let isBig = false;
         return {
             update() {
                 if (isBig) {
-                    CURRENT_JUMP_FORCE = BIG_JUMP_FORCE
-                    timer -=dt()
-                    if (timer <= 0) {
-                        this.smallify()
-                    }
+                    CURRENT_JUMP_FORCE = BIG_JUMP_FORCE;
+                    timer -= dt();
+                    if (timer <= 0) this.smallify();
                 }
             },
-            isBig() {
-                return isBig
-            },
+            isBig()    { return isBig; },
             smallify() {
-                this.scale = vec2(1)
-                CURRENT_JUMP_FORCE = JUMP_FORCE
-                timer = 0
-                isBig = false
+                this.scale = vec2(1);
+                CURRENT_JUMP_FORCE = JUMP_FORCE;
+                timer = 0;
+                isBig = false;
             },
-            biggify() {
-                this.scale = vec2(2)
-                CURRENT_JUMP_FORCE = BIG_JUMP_FORCE
-                timer = time
-                isBig = true
-            }
-        }
+            biggify(duration) {
+                this.scale = vec2(2);
+                CURRENT_JUMP_FORCE = BIG_JUMP_FORCE;
+                timer = duration || 6;
+                isBig = true;
+            },
+        };
     }
 
     const scoreLabel = add([
-        text("SCORE: " + score),
+        text('SCORE: ' + score),
         pos(30, 6),
         layer('ui'),
-        {
-            value: score,
-        }
-    ])
+        { value: score },
+    ]);
 
-    add([text('level ' + parseInt(level + 1)), pos(40,25)])
+    add([text('WORLD 1-' + (level + 1)), pos(30, 25), layer('ui')]);
 
     const player = add([
-        sprite('mario'), 
-        solid(), 
-        // Starting Position
+        sprite('mario'),
+        solid(),
         pos(30, 0),
-        // Body method will automatically add gravity
-        body(), 
+        body(),
         origin('bot'),
         big(),
-    ])
+    ]);
 
-    //Action for moving mushroom
-    action('mushroom', (m) => {
-        m.move(20, 0)
-    })
+    // Enemy AI
+    action('mushroom',  (m) => m.move(20, 0));
+    action('dangerous', (d) => d.move(-20, 0));
 
-    //Make evil mushrooms move
-    const ENEMY_SPEED = 20
-    action('dangerous', (d) => {
-        d.move(-ENEMY_SPEED, 0)
-    })
-
-    //HeadBump
-    player.on("headbump", (obj) => {
-        //Add conditional for coin-suprise headbump
-        if (obj.is('coin-suprise-box')) {
-            //Spawn coin right above object's position
-            gameLevel.spawn('$', obj.gridPos.sub(0,1))
-            //Destroy object
-            destroy(obj)
-            //Replace object with unboxed version of the surprise box
-            gameLevel.spawn('}', obj.gridPos.sub(0,0))
+    // Head-bump surprise boxes
+    player.on('headbump', (obj) => {
+        if (obj.is('coin-surprise-box')) {
+            gameLevel.spawn('$', obj.gridPos.sub(0, 1));
+            destroy(obj);
+            gameLevel.spawn('}', obj.gridPos.sub(0, 0));
         }
-        //Add conditional for mushroom-surprise headbump
         if (obj.is('mushroom-surprise')) {
-            //Spawn shroom right above object's position
-            gameLevel.spawn('#', obj.gridPos.sub(0,1))
-            //Destroy object
-            destroy(obj)
-            //Replace object with unboxed version of the surprise box
-            gameLevel.spawn('}', obj.gridPos.sub(0,0))
+            gameLevel.spawn('#', obj.gridPos.sub(0, 1));
+            destroy(obj);
+            gameLevel.spawn('}', obj.gridPos.sub(0, 0));
         }
-        //Adding conditionals for blue versions of coin and mushroom surprise boxes
-        if (obj.is('blue-coin-suprise-box')) {
-            //Spawn coin right above object's position
-            gameLevel.spawn('$', obj.gridPos.sub(0,1))
-            //Destroy object
-            destroy(obj)
-            //Replace object with unboxed version of the surprise box
-            gameLevel.spawn('/', obj.gridPos.sub(0,0))
+        if (obj.is('blue-coin-surprise-box')) {
+            gameLevel.spawn('$', obj.gridPos.sub(0, 1));
+            destroy(obj);
+            gameLevel.spawn('/', obj.gridPos.sub(0, 0));
         }
         if (obj.is('blue-mushroom-surprise')) {
-            //Spawn shroom right above object's position
-            gameLevel.spawn('#', obj.gridPos.sub(0,1))
-            //Destroy object
-            destroy(obj)
-            //Replace object with unboxed version of the surprise box
-            gameLevel.spawn('/', obj.gridPos.sub(0,0))
+            gameLevel.spawn('#', obj.gridPos.sub(0, 1));
+            destroy(obj);
+            gameLevel.spawn('/', obj.gridPos.sub(0, 0));
         }
-    })
+    });
 
-    //Mario Eats Mushroom and Grows
+    // Collectibles & hazards
     player.collides('mushroom', (m) => {
-        destroy(m)
-        player.biggify(6)
-    })
+        destroy(m);
+        player.biggify(6);
+    });
 
-    //Mario Collects Coin
     player.collides('coin', (c) => {
-        destroy(c)
-        scoreLabel.value++
-        scoreLabel.text = scoreLabel.value
-    })
+        destroy(c);
+        scoreLabel.value++;
+        scoreLabel.text = 'SCORE: ' + scoreLabel.value;
+    });
 
-    //Mario collides with Enemies
     player.collides('dangerous', (d) => {
         if (isJumping) {
-            destroy(d)
+            destroy(d);
         } else {
-            go('lose', { score: scoreLabel.value })
+            go('lose', { score: scoreLabel.value });
         }
-    })
-   
-    //Establish Camera Position and Bottom of Game
-    player.action(() => {
-        //Put Camera on Player
-        camPos(player.pos)
-        //Establish "bottom"
-        if (player.pos.y >= FALL_DEATH) {
-            go('lose', { score: scoreLabel.value })
-        }
-    })
+    });
 
-    // Transfer player and score to next level (Using Pipe)
+    // Pipe — enter to advance to the next level
+    let nearPipe = false;
     player.collides('pipe', () => {
+        nearPipe = true;
+        // Keyboard path
         keyDown('down', () => {
             go('game', {
                 level: (level + 1) % maps.length,
                 score: scoreLabel.value,
-            })
-        })
-    })
+            });
+        });
+    });
 
-    //Attach key events to player as event listeners
-    keyDown('left', () => {
-        player.move(-MOVE_SPEED, 0)
-    })
-
-    keyDown('right', () => {
-        player.move(MOVE_SPEED, 0)
-    })
-
+    // Main player action loop — handles camera, fall death, and touch input
     player.action(() => {
-        if (player.grounded()) {
-            isJumping = false
-        }
-    })
+        camPos(player.pos);
 
+        if (player.grounded()) isJumping = false;
+
+        // Touch / on-screen movement
+        if (virtualKeys.left)  player.move(-MOVE_SPEED, 0);
+        if (virtualKeys.right) player.move(MOVE_SPEED, 0);
+
+        // Touch jump — consume the flag so it fires once per tap
+        if (virtualKeys.jump && player.grounded()) {
+            isJumping = true;
+            player.jump(CURRENT_JUMP_FORCE);
+            virtualKeys.jump = false;
+        }
+
+        // Touch pipe entry
+        if (nearPipe && virtualKeys.down) {
+            nearPipe = false;
+            virtualKeys.down = false;
+            go('game', {
+                level: (level + 1) % maps.length,
+                score: scoreLabel.value,
+            });
+        }
+
+        if (player.pos.y >= FALL_DEATH) {
+            go('lose', { score: scoreLabel.value });
+        }
+    });
+
+    // Keyboard bindings
+    keyDown('left',  () => player.move(-MOVE_SPEED, 0));
+    keyDown('right', () => player.move(MOVE_SPEED, 0));
     keyDown('space', () => {
-        if(player.grounded()) {
-            isJumping = true
-            player.jump(CURRENT_JUMP_FORCE)
+        if (player.grounded()) {
+            isJumping = true;
+            player.jump(CURRENT_JUMP_FORCE);
         }
-    })
+    });
 
+    // Escape key opens the Warp Zone level-select overlay
+    keyDown('escape', () => window.openWarp());
 });
 
 scene('lose', ({ score }) => {
-    add([text(score, 32), origin('center'), pos(width()/2, height()/2)])
+    document.getElementById('final-score').textContent        = score;
+    document.getElementById('game-over-screen').style.display = 'flex';
+    document.getElementById('game-hud').style.display         = 'none';
+    document.getElementById('mobile-controls').style.display  = 'none';
 });
 
-// Start Game
-start("game", { level: 0, score: 0 });
+// Start on the menu scene — HTML title screen overlay handles the UI
+start('menu');
