@@ -2,62 +2,128 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b0b2a" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles/styles.css" />
-    <title>Super Mario</title>
+    <title>Super Mario · Retro Worlds</title>
   </head>
-  <body>
+  <body class="theme-space">
 
-    <!-- ── Title / Level Select ─────────────────────────────────────────── -->
-    <div id="title-screen" class="overlay">
-      <div class="overlay-inner">
-        <div class="stars">★ ★ ★ ★ ★</div>
-        <h1 class="game-title">SUPER<br/>MARIO</h1>
-        <p class="blink subtitle">— SELECT WORLD —</p>
-        <div class="btn-list">
-          <button class="pixel-btn" onclick="window.startGame(0)">WORLD 1-1</button>
-          <button class="pixel-btn" onclick="window.startGame(1)">WORLD 1-2</button>
-          <button class="pixel-btn" onclick="window.startGame(2)">WORLD 1-3</button>
+    <!-- ── Parallax backdrop (behind the transparent game canvas) ──────────── -->
+    <div id="backdrop">
+      <div class="bd-layer" id="bd-sky"></div>
+
+      <div class="bd-layer" id="bd-mid">
+        <!-- SPACE -->
+        <div class="scene scene-space">
+          <div class="stars-far"></div>
+          <div class="stars-near"></div>
+          <div class="planet"></div>
+          <div class="moon-small"></div>
+          <div class="shooting-star"></div>
         </div>
-        <p class="hint">← → MOVE &nbsp;·&nbsp; SPACE JUMP &nbsp;·&nbsp; ↓ ENTER PIPE</p>
+        <!-- SUNSET -->
+        <div class="scene scene-sunset">
+          <div class="synth-sun"></div>
+        </div>
+        <!-- PRAIRIE -->
+        <div class="scene scene-prairie">
+          <div class="prairie-sun"></div>
+        </div>
+        <!-- HALLOWEEN -->
+        <div class="scene scene-halloween">
+          <div class="stars-spooky"></div>
+          <div class="pumpkin-moon"></div>
+        </div>
+      </div>
+
+      <div class="bd-layer" id="bd-near">
+        <!-- SUNSET -->
+        <div class="scene scene-sunset">
+          <div class="cloud cloud-dark c1"></div>
+          <div class="cloud cloud-dark c2"></div>
+          <div class="cloud cloud-dark c3"></div>
+        </div>
+        <!-- PRAIRIE -->
+        <div class="scene scene-prairie">
+          <div class="cloud cloud-white c1"></div>
+          <div class="cloud cloud-white c2"></div>
+          <div class="cloud cloud-white c3"></div>
+          <div class="hills hills-far"></div>
+          <div class="hills hills-close"></div>
+        </div>
+        <!-- HALLOWEEN -->
+        <div class="scene scene-halloween">
+          <div class="bat b1"></div>
+          <div class="bat b2"></div>
+          <div class="bat b3"></div>
+          <div class="ghost"></div>
+          <div class="fog"></div>
+        </div>
       </div>
     </div>
 
-    <!-- ── Game Over ─────────────────────────────────────────────────────── -->
+    <!-- ── Title / World Select ─────────────────────────────────────────────── -->
+    <div id="title-screen" class="overlay">
+      <div class="overlay-inner">
+        <div class="deco-stars">✦ ✦ ✦ ✦ ✦</div>
+        <h1 class="game-title float-anim">SUPER<br/>MARIO</h1>
+        <p class="blink subtitle">— SELECT WORLD —</p>
+        <div class="btn-list">
+          <button class="pixel-btn w-space"   onclick="window.startGame(0)">✦ WORLD 1 · SPACE</button>
+          <button class="pixel-btn w-sunset"  onclick="window.startGame(1)">◗ WORLD 2 · SUNSET</button>
+          <button class="pixel-btn w-prairie" onclick="window.startGame(2)">❋ WORLD 3 · PRAIRIE</button>
+          <button class="pixel-btn w-spooky"  onclick="window.startGame(3)">◍ WORLD 4 · SPOOKY</button>
+        </div>
+        <p class="hint">← → MOVE · SPACE JUMP · ▼ PIPE · ESC WARP<br/>KEYS 1–4 QUICK SELECT</p>
+        <p class="blink insert-coin">INSERT COIN · FREE PLAY</p>
+      </div>
+    </div>
+
+    <!-- ── Game Over ────────────────────────────────────────────────────────── -->
     <div id="game-over-screen" class="overlay" style="display:none">
       <div class="overlay-inner">
         <h1 class="game-title red-text">GAME<br/>OVER</h1>
-        <p class="score-text">SCORE: <span id="final-score">0</span></p>
+        <p id="new-record" class="blink record-text" style="display:none">★ NEW RECORD ★</p>
+        <p class="score-text">SCORE <span id="final-score">000</span></p>
+        <p class="score-text dim">BEST&nbsp; <span id="final-hi">000</span></p>
         <div class="btn-list">
-          <button class="pixel-btn" onclick="window.retryGame()">► TRY AGAIN</button>
-          <button class="pixel-btn alt-btn" onclick="window.goToTitle()">► LEVEL SELECT</button>
+          <button class="pixel-btn w-sunset" onclick="window.retryGame()">► TRY AGAIN</button>
+          <button class="pixel-btn w-space"  onclick="window.goToTitle()">► WORLD SELECT</button>
         </div>
       </div>
     </div>
 
-    <!-- ── Warp Zone (in-game level select) ──────────────────────────────── -->
+    <!-- ── Warp Zone (in-game world select, pauses enemies) ─────────────────── -->
     <div id="warp-screen" class="overlay semi-overlay" style="display:none">
       <div class="overlay-inner">
-        <div class="stars gold">★ WARP ZONE ★</div>
+        <div class="deco-stars gold">⚡ WARP ZONE ⚡</div>
         <p class="subtitle">CHOOSE YOUR WORLD</p>
         <div class="btn-list">
-          <button class="pixel-btn" onclick="window.startGame(0)">WORLD 1-1</button>
-          <button class="pixel-btn" onclick="window.startGame(1)">WORLD 1-2</button>
-          <button class="pixel-btn" onclick="window.startGame(2)">WORLD 1-3</button>
-          <button class="pixel-btn green-btn" onclick="window.closeWarp()">► RESUME</button>
+          <button class="pixel-btn w-space"   onclick="window.startGame(0)">✦ WORLD 1 · SPACE</button>
+          <button class="pixel-btn w-sunset"  onclick="window.startGame(1)">◗ WORLD 2 · SUNSET</button>
+          <button class="pixel-btn w-prairie" onclick="window.startGame(2)">❋ WORLD 3 · PRAIRIE</button>
+          <button class="pixel-btn w-spooky"  onclick="window.startGame(3)">◍ WORLD 4 · SPOOKY</button>
+          <button class="pixel-btn w-resume"  onclick="window.closeWarp()">► RESUME</button>
         </div>
       </div>
     </div>
 
-    <!-- ── In-game HUD (warp button, all devices) ────────────────────────── -->
+    <!-- ── In-game HUD ──────────────────────────────────────────────────────── -->
     <div id="game-hud" style="display:none">
-      <button class="hud-warp-btn" onclick="window.openWarp()">⚡ WARP</button>
+      <span id="hud-score">SCORE 000</span>
+      <span id="hud-world">WORLD 1 · SPACE</span>
+      <span id="hud-right">
+        <span id="hud-hi">HI 000</span>
+        <button class="hud-warp-btn" onclick="window.openWarp()">⚡WARP</button>
+      </span>
     </div>
+    <div id="hud-toast" style="display:none">PRESS ▼ TO WARP</div>
 
-    <!-- ── Mobile Controls ───────────────────────────────────────────────── -->
+    <!-- ── Mobile Controls ──────────────────────────────────────────────────── -->
     <div id="mobile-controls">
       <div id="dpad">
         <button id="btn-left"  class="ctrl-btn">◄</button>
@@ -68,6 +134,9 @@
         <button id="btn-jump" class="ctrl-btn jump-ctrl">A</button>
       </div>
     </div>
+
+    <!-- ── CRT scanlines + vignette over everything ─────────────────────────── -->
+    <div id="crt"></div>
 
     <script src="https://kaboomjs.com/lib/0.5.0/kaboom.js"></script>
     <script src="game.js"></script>
