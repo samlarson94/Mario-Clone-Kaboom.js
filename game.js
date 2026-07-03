@@ -34,6 +34,188 @@ const SFX = (() => {
     };
 })();
 
+// ── Chiptune background music (WebAudio square/triangle step sequencer) ──────
+// Each track loops forever: a lead line (square wave) over a bass pulse
+// (triangle wave). No audio files — every note is synthesized, just like SFX.
+const MUSIC = (() => {
+    let ctx = null;
+    let masterGain = null;
+    let muted = false;
+    try { muted = localStorage.getItem('marioMusicMuted') === '1'; } catch (e) {}
+
+    let currentTrack = null;
+    let genToken = 0;
+    let timerId = null;
+
+    function ensureCtx() {
+        try {
+            if (!ctx) {
+                ctx = new (window.AudioContext || window.webkitAudioContext)();
+                masterGain = ctx.createGain();
+                masterGain.gain.value = muted ? 0 : 0.2;
+                masterGain.connect(ctx.destination);
+            }
+            if (ctx.state === 'suspended') ctx.resume();
+        } catch (e) { /* audio unavailable — fail silently */ }
+    }
+
+    // note name ('C4', 'F#3', ...) -> frequency, equal temperament, A4 = 440Hz
+    const SEMI = { C: -9, 'C#': -8, D: -7, 'D#': -6, E: -5, F: -4, 'F#': -3, G: -2, 'G#': -1, A: 0, 'A#': 1, B: 2 };
+    function freq(note) {
+        if (!note) return 0; // rest
+        const m = /^([A-G]#?)(\d)$/.exec(note);
+        if (!m) return 0;
+        const semi = SEMI[m[1]] + (parseInt(m[2], 10) - 4) * 12;
+        return 440 * Math.pow(2, semi / 12);
+    }
+
+    function playNote(f, t, dur, type, vol) {
+        const osc  = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.value = f;
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(vol, t + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        osc.connect(gain);
+        gain.connect(masterGain);
+        osc.start(t);
+        osc.stop(t + dur + 0.03);
+    }
+
+    // line: [[noteName|null, beats], ...] — schedules starting at startAt, returns total duration
+    function scheduleLine(line, startAt, beat, type, vol) {
+        let t = startAt;
+        line.forEach(([note, beats]) => {
+            const dur = beats * beat;
+            const f = freq(note);
+            if (f > 0) playNote(f, t, dur * 0.88, type, vol);
+            t += dur;
+        });
+        return t - startAt;
+    }
+
+    const TRACKS = {
+        title: { // bright C-major fanfare loop for the world-select screen
+            tempo: 150,
+            lead: [
+                ['C5', 0.5], ['E5', 0.5], ['G5', 0.5], ['C6', 0.5],
+                ['G5', 0.5], ['E5', 0.5], ['C5', 0.5], ['E5', 0.5],
+                ['F5', 0.5], ['A5', 0.5], ['G5', 0.5], ['E5', 0.5],
+                ['D5', 0.5], ['F5', 0.5], ['E5', 1],
+                ['C5', 0.5], ['D5', 0.5], ['E5', 0.5], ['G5', 0.5],
+                ['A5', 0.5], ['G5', 0.5], ['E5', 0.5], ['C5', 0.5],
+                ['D5', 1], ['G4', 1],
+            ],
+            bass: [
+                ['C3', 1], ['G2', 1], ['A2', 1], ['G2', 1],
+                ['F2', 1], ['C3', 1], ['G2', 1], ['C3', 1],
+                ['C3', 1], ['G2', 1], ['A2', 1], ['G2', 1],
+                ['F2', 1], ['G2', 1], ['C3', 2],
+            ],
+        },
+        space: { // mysterious A-minor arpeggios — WORLD 1
+            tempo: 118,
+            lead: [
+                ['A4', 0.5], ['C5', 0.5], ['E5', 0.5], ['A5', 0.5],
+                ['G5', 0.5], ['E5', 0.5], ['C5', 0.5], ['E5', 0.5],
+                ['F5', 0.5], ['A5', 0.5], ['C6', 0.5], ['A5', 0.5],
+                ['E5', 0.5], ['C5', 0.5], ['A4', 1],
+                ['B4', 0.5], ['D5', 0.5], ['F5', 0.5], ['D5', 0.5],
+                ['B4', 0.5], ['G4', 0.5], ['E4', 1],
+            ],
+            bass: [
+                ['A2', 2], ['A2', 2], ['F2', 2], ['F2', 2],
+                ['C3', 2], ['C3', 2], ['E2', 2], ['E2', 2],
+            ],
+        },
+        sunset: { // driving synthwave groove — WORLD 2
+            tempo: 128,
+            lead: [
+                ['E5', 0.5], ['D5', 0.5], ['C5', 0.5], ['D5', 0.5],
+                ['E5', 0.5], ['E5', 0.5], ['E5', 1],
+                ['D5', 0.5], ['D5', 0.5], ['D5', 1],
+                ['E5', 0.5], ['G5', 0.5], ['G5', 1],
+                ['E5', 0.5], ['D5', 0.5], ['C5', 0.5], ['D5', 0.5],
+                ['E5', 0.5], ['D5', 0.5], ['C5', 0.5], ['B4', 0.5],
+                ['C5', 2],
+            ],
+            bass: [
+                ['A2', 0.5], ['A2', 0.5], ['A2', 0.5], ['A2', 0.5],
+                ['F2', 0.5], ['F2', 0.5], ['F2', 0.5], ['F2', 0.5],
+                ['G2', 0.5], ['G2', 0.5], ['G2', 0.5], ['G2', 0.5],
+                ['E2', 0.5], ['E2', 0.5], ['E2', 0.5], ['E2', 0.5],
+            ],
+        },
+        prairie: { // bouncy pastoral G-major walk — WORLD 3
+            tempo: 140,
+            lead: [
+                ['G4', 0.5], ['B4', 0.5], ['D5', 0.5], ['G5', 0.5],
+                ['D5', 0.5], ['B4', 0.5], ['G4', 1],
+                ['A4', 0.5], ['C5', 0.5], ['E5', 0.5], ['A5', 0.5],
+                ['E5', 0.5], ['C5', 0.5], ['A4', 1],
+                ['B4', 0.5], ['D5', 0.5], ['G5', 0.5], ['B5', 0.5],
+                ['A5', 0.5], ['G5', 0.5], ['F#5', 0.5], ['G5', 0.5],
+                ['D5', 1], ['G4', 1],
+            ],
+            bass: [
+                ['G2', 1], ['B2', 1], ['D3', 1], ['B2', 1],
+                ['A2', 1], ['C3', 1], ['E3', 1], ['C3', 1],
+                ['B2', 1], ['D3', 1], ['G3', 1], ['D3', 1],
+            ],
+        },
+        spooky: { // eerie minor crawl — WORLD 4
+            tempo: 96,
+            lead: [
+                ['D5', 0.5], ['A#4', 0.5], ['D5', 0.5], ['F5', 0.5],
+                ['D#5', 0.5], ['C5', 0.5], ['A#4', 1],
+                ['D5', 0.5], ['A#4', 0.5], ['G#4', 0.5], ['A4', 0.5],
+                ['D5', 1], ['C5', 1],
+                ['A#4', 0.5], ['G4', 0.5], ['A#4', 0.5], ['D5', 0.5],
+                ['C5', 0.5], ['A4', 0.5], ['G4', 1],
+            ],
+            bass: [
+                ['D3', 2], ['D3', 2], ['A#2', 2], ['A#2', 2],
+                ['G#2', 2], ['G#2', 2], ['A2', 2], ['A2', 2],
+            ],
+        },
+    };
+
+    function runLoop(name, token) {
+        if (token !== genToken || !ctx) return;
+        const track = TRACKS[name];
+        const beat = 60 / track.tempo;
+        const startAt = ctx.currentTime + 0.05;
+        const dur = scheduleLine(track.lead, startAt, beat, 'square', 0.22);
+        if (track.bass) scheduleLine(track.bass, startAt, beat, 'triangle', 0.16);
+        timerId = setTimeout(() => runLoop(name, token), Math.max(80, (dur - 0.12) * 1000));
+    }
+
+    return {
+        play(name) {
+            if (!TRACKS[name] || currentTrack === name) return;
+            ensureCtx();
+            if (!ctx) return;
+            currentTrack = name;
+            genToken++;
+            clearTimeout(timerId);
+            runLoop(name, genToken);
+        },
+        stop() {
+            currentTrack = null;
+            genToken++;
+            clearTimeout(timerId);
+        },
+        toggleMute() {
+            muted = !muted;
+            try { localStorage.setItem('marioMusicMuted', muted ? '1' : '0'); } catch (e) {}
+            if (masterGain) masterGain.gain.value = muted ? 0 : 0.2;
+            return muted;
+        },
+        isMuted() { return muted; },
+    };
+})();
+
 // ── World metadata (theme class drives the CSS backdrop scene) ───────────────
 const WORLD_INFO = [
     { name: 'SPACE',   css: 'theme-space' },
@@ -98,6 +280,7 @@ window.startGame = (level, score = 0) => {
     gameState = 'playing';
     window.__paused = false;
     SFX.warp();
+    MUSIC.play(WORLD_INFO[level].music);
     $id('title-screen').style.display     = 'none';
     $id('game-over-screen').style.display = 'none';
     $id('warp-screen').style.display      = 'none';
@@ -113,6 +296,7 @@ window.goToTitle = () => {
     gameState = 'title';
     window.__paused = true;
     setTheme(0);
+    MUSIC.play('title');
     $id('game-over-screen').style.display = 'none';
     $id('warp-screen').style.display      = 'none';
     $id('game-hud').style.display         = 'none';
@@ -133,6 +317,29 @@ window.closeWarp = () => {
     $id('warp-screen').style.display = 'none';
     focusCanvas();
 };
+
+function updateMuteButtons(muted) {
+    ['btn-mute-title', 'btn-mute-hud'].forEach((id) => {
+        const el = $id(id);
+        if (el) el.textContent = muted ? '♪ OFF' : '♪ ON';
+    });
+}
+
+window.toggleMusic = () => {
+    updateMuteButtons(MUSIC.toggleMute());
+    SFX.select();
+};
+
+// Browsers block audio until a user gesture — start the title theme on the
+// first tap/click/keypress anywhere, so it's playing by the time they choose.
+document.addEventListener('pointerdown', function unlockMusic() {
+    document.removeEventListener('pointerdown', unlockMusic);
+    if (gameState === 'title') MUSIC.play('title');
+}, { once: true });
+document.addEventListener('keydown', function unlockMusicKey() {
+    document.removeEventListener('keydown', unlockMusicKey);
+    if (gameState === 'title') MUSIC.play('title');
+}, { once: true });
 
 // Keyboard shortcuts that work regardless of canvas focus
 document.addEventListener('keydown', (e) => {
@@ -202,8 +409,8 @@ kaboom({
 });
 
 const MOVE_SPEED = 120;
-const JUMP_FORCE = 380;
-const BIG_JUMP_FORCE = 550;
+const JUMP_FORCE = 450;
+const BIG_JUMP_FORCE = 650;
 let CURRENT_JUMP_FORCE = JUMP_FORCE;
 const FALL_DEATH = 400;
 const COYOTE_TIME = 0.1;   // grace period to jump after walking off a ledge
@@ -461,6 +668,7 @@ scene('game', ({ level, score }) => {
         if (warped) return;
         warped = true;
         SFX.die();
+        MUSIC.stop();
         saveHi(scoreVal);
         go('lose', { score: scoreVal });
     }
@@ -616,4 +824,5 @@ scene('lose', ({ score }) => {
 
 // Boot to the title screen
 setTheme(0);
+updateMuteButtons(MUSIC.isMuted());
 start('menu');

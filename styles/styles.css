@@ -660,6 +660,11 @@ canvas { position: relative; z-index: 1; }
   margin: 16px 0 0;
 }
 
+.mute-standalone {
+  display: block;
+  margin: 16px auto 0;
+}
+
 @keyframes blink {
   0%, 49%, 100% { opacity: 1; }
   50%, 99%      { opacity: 0; }
