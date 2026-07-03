@@ -198,8 +198,8 @@ kaboom({
 });
 
 const MOVE_SPEED = 120;
-const JUMP_FORCE = 380;
-const BIG_JUMP_FORCE = 550;
+const JUMP_FORCE = 450;
+const BIG_JUMP_FORCE = 650;
 let CURRENT_JUMP_FORCE = JUMP_FORCE;
 const FALL_DEATH = 400;
 const COYOTE_TIME = 0.1;   // grace period to jump after walking off a ledge
