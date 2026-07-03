@@ -43,6 +43,9 @@ canvas { position: relative; z-index: 1; }
 .theme-sunset    .scene-sunset    { display: block; }
 .theme-prairie   .scene-prairie   { display: block; }
 .theme-halloween .scene-halloween { display: block; }
+.theme-stadium   .scene-stadium   { display: block; }
+.theme-beach     .scene-beach     { display: block; }
+.theme-jungle    .scene-jungle    { display: block; }
 
 /* ── Sky gradients per theme ──────────────────────────────────────────────── */
 .theme-space #bd-sky {
@@ -56,6 +59,15 @@ canvas { position: relative; z-index: 1; }
 }
 .theme-halloween #bd-sky {
   background: linear-gradient(to bottom, #0d0416 0%, #1e0830 45%, #3a0f42 75%, #4a1435 100%);
+}
+.theme-stadium #bd-sky {
+  background: linear-gradient(to bottom, #050512 0%, #0a1030 55%, #16234e 100%);
+}
+.theme-beach #bd-sky {
+  background: linear-gradient(to bottom, #2eb8ee 0%, #7dd4f5 42%, #c8ecfa 62%, #ffeeba 100%);
+}
+.theme-jungle #bd-sky {
+  background: linear-gradient(to bottom, #071b0c 0%, #123a1a 40%, #1e5426 75%, #2a6b33 100%);
 }
 
 /* ── SPACE scene ──────────────────────────────────────────────────────────── */
@@ -91,7 +103,7 @@ canvas { position: relative; z-index: 1; }
 
 .planet {
   position: absolute;
-  top: 9vh; right: 12vw;
+  top: 9vh; right: calc(12vw + 15vw);
   width: 110px; height: 110px;
   border-radius: 50%;
   background: radial-gradient(circle at 38% 35%,
@@ -112,7 +124,7 @@ canvas { position: relative; z-index: 1; }
 
 .moon-small {
   position: absolute;
-  top: 55vh; left: 8vw;
+  top: 55vh; left: calc(8vw + 15vw);
   width: 42px; height: 42px;
   border-radius: 50%;
   background: radial-gradient(circle at 40% 35%, #e8e8f2 0 45%, #b9b9cf 45% 100%);
@@ -121,7 +133,7 @@ canvas { position: relative; z-index: 1; }
 
 .shooting-star {
   position: absolute;
-  top: 8vh; left: 65vw;
+  top: 8vh; left: calc(65vw + 15vw);
   width: 90px; height: 2px;
   background: linear-gradient(90deg, #ffffff, transparent);
   transform: rotate(155deg);
@@ -162,7 +174,7 @@ canvas { position: relative; z-index: 1; }
 /* ── PRAIRIE scene ────────────────────────────────────────────────────────── */
 .prairie-sun {
   position: absolute;
-  top: 7vh; right: 14vw;
+  top: 7vh; right: calc(14vw + 15vw);
   width: 90px; height: 90px;
   border-radius: 50%;
   background: radial-gradient(circle, #fffde7 0 30%, #ffe866 30% 62%, #ffc93d 62% 100%);
@@ -232,7 +244,7 @@ canvas { position: relative; z-index: 1; }
 
 .pumpkin-moon {
   position: absolute;
-  top: 8vh; left: 10vw;
+  top: 8vh; left: calc(10vw + 15vw);
   width: 130px; height: 130px;
   border-radius: 50%;
   background: radial-gradient(circle at 40% 35%,
@@ -279,7 +291,7 @@ canvas { position: relative; z-index: 1; }
 
 .ghost {
   position: absolute;
-  top: 52vh; left: 70vw;
+  top: 52vh; left: calc(70vw + 15vw);
   width: 34px; height: 42px;
   background: rgba(240, 240, 255, 0.22);
   border-radius: 17px 17px 0 0;
@@ -310,6 +322,241 @@ canvas { position: relative; z-index: 1; }
 @keyframes fogflow {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
+}
+
+/* ── STADIUM scene ────────────────────────────────────────────────────────── */
+.floodlight {
+  position: absolute;
+  top: 4vh;
+  width: 54px; height: 14px;
+  background: linear-gradient(#fffbe0, #d8d8b0);
+  box-shadow: 0 0 40px 14px rgba(255, 250, 210, 0.5);
+  animation: glowpulse 4s ease-in-out infinite;
+}
+.floodlight::after {                       /* light tower pole */
+  content: '';
+  position: absolute;
+  top: 14px; left: 50%;
+  width: 6px; height: 18vh;
+  margin-left: -3px;
+  background: #1a2038;
+}
+.fl-left  { left: calc(9vw + 15vw); }
+.fl-right { right: calc(9vw + 15vw); animation-delay: 2s; }
+@keyframes glowpulse {
+  0%, 100% { box-shadow: 0 0 40px 14px rgba(255, 250, 210, 0.5); }
+  50%      { box-shadow: 0 0 52px 20px rgba(255, 250, 210, 0.65); }
+}
+
+.crowd {
+  position: absolute;
+  top: 22vh;
+  width: 100%; height: 24vh;
+  background-color: #232a45;
+  background-image:
+    repeating-linear-gradient(to bottom,
+      transparent 0 9px, rgba(8, 10, 24, 0.85) 9px 12px),
+    radial-gradient(circle at 3px 4px,  #e0b46a 1.6px, transparent 2.4px),
+    radial-gradient(circle at 10px 8px, #c8524a 1.6px, transparent 2.4px),
+    radial-gradient(circle at 17px 3px, #5a86c8 1.6px, transparent 2.4px),
+    radial-gradient(circle at 24px 7px, #d8d0c0 1.6px, transparent 2.4px),
+    radial-gradient(circle at 31px 5px, #74a85c 1.6px, transparent 2.4px);
+  background-size: 100% 100%, 38px 12px, 38px 12px, 38px 12px, 38px 12px, 38px 12px;
+  border-bottom: 4px solid #0c1020;
+}
+
+.crowd-wave {                              /* the wave going around the stadium */
+  position: absolute;
+  top: 22vh; left: 0;
+  width: 22%; height: 24vh;
+  background: linear-gradient(90deg,
+    transparent 0%, rgba(255, 255, 255, 0.14) 50%, transparent 100%);
+  animation: thewave 7s linear infinite;
+}
+@keyframes thewave {
+  from { left: -25%; }
+  to   { left: 105%; }
+}
+
+.gridiron {
+  position: absolute;
+  bottom: 0;
+  width: 100%; height: 54vh;
+  background-color: #1e7a32;
+  background-image:
+    repeating-linear-gradient(to bottom,
+      rgba(255, 255, 255, 0.05) 0 4vh, rgba(0, 60, 15, 0.25) 4vh 8vh),
+    repeating-linear-gradient(90deg,
+      transparent 0 116px, rgba(255, 255, 255, 0.75) 116px 120px);
+  border-top: 3px solid rgba(255, 255, 255, 0.6);
+}
+
+/* ── BEACH scene ──────────────────────────────────────────────────────────── */
+.beach-sun {
+  position: absolute;
+  top: 6vh; right: calc(12vw + 15vw);
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fffef0 0 30%, #ffe97a 30% 62%, #ffce45 62% 100%);
+  box-shadow: 0 0 70px 18px rgba(255, 233, 122, 0.55);
+}
+
+.seagull {
+  position: absolute;
+  width: 8px; height: 4px;
+}
+.seagull::before, .seagull::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 11px; height: 3px;
+  background: #f5f8fa;
+  animation: flap 0.5s steps(2) infinite;
+}
+.seagull::before { left: -10px; }
+.seagull::after  { right: -10px; }
+.seagull.g1 { top: 14vh; animation: fly 26s linear infinite; }
+.seagull.g2 { top: 22vh; animation: fly 34s linear 12s infinite; transform: scale(0.7); }
+
+.sailboat {
+  position: absolute;
+  top: 52vh; left: 20vw;
+  width: 46px; height: 12px;
+  background: #7a4a2a;                      /* hull */
+  clip-path: polygon(0 0, 100% 0, 82% 100%, 18% 100%);
+  animation: sail 40s linear infinite alternate;
+}
+.sailboat::before {                        /* sail */
+  content: '';
+  position: absolute;
+  bottom: 12px; left: 20px;
+  width: 0; height: 0;
+  border-left: 22px solid #ffffff;
+  border-top: 30px solid transparent;
+}
+@keyframes sail {
+  from { left: calc(8vw + 15vw); }
+  to   { left: calc(75vw + 15vw); }
+}
+
+.ocean {
+  position: absolute;
+  bottom: 16vh;
+  width: 200%; height: 26vh;
+  background-color: #1580b8;
+  background-image:
+    repeating-linear-gradient(90deg,
+      rgba(255, 255, 255, 0.16) 0 26px, transparent 26px 90px),
+    linear-gradient(to bottom, #35a8d8 0%, #1580b8 45%, #0c5e94 100%);
+  border-top: 4px solid rgba(255, 255, 255, 0.85);
+  animation: fogflow 18s linear infinite;
+}
+
+.sand {
+  position: absolute;
+  bottom: 0;
+  width: 100%; height: 16vh;
+  background:
+    radial-gradient(circle at 22% 30%, rgba(160, 120, 60, 0.25) 2px, transparent 3px),
+    radial-gradient(circle at 67% 65%, rgba(160, 120, 60, 0.25) 2px, transparent 3px),
+    linear-gradient(to bottom, #f2dca6 0%, #e3c184 100%);
+  background-size: 60px 40px, 90px 50px, 100% 100%;
+}
+
+.umbrella {
+  position: absolute;
+  bottom: 12vh; left: calc(68vw + 15vw);
+  width: 90px; height: 45px;
+  border-radius: 90px 90px 0 0;
+  background: repeating-linear-gradient(90deg,
+    #e04848 0 15px, #ffffff 15px 30px);
+}
+.umbrella::after {                         /* pole */
+  content: '';
+  position: absolute;
+  top: 40px; left: 50%;
+  width: 5px; height: 10vh;
+  margin-left: -2.5px;
+  background: #8a5a30;
+}
+
+/* ── JUNGLE scene ─────────────────────────────────────────────────────────── */
+.canopy {
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+.canopy-far {
+  height: 24vh;
+  background: #0c2c12;
+  clip-path: polygon(
+    0 0, 100% 0, 100% 55%, 93% 55%, 93% 75%, 85% 75%, 85% 50%, 78% 50%,
+    78% 68%, 70% 68%, 70% 45%, 62% 45%, 62% 80%, 54% 80%, 54% 55%,
+    46% 55%, 46% 70%, 38% 70%, 38% 48%, 30% 48%, 30% 78%, 22% 78%,
+    22% 52%, 14% 52%, 14% 68%, 7% 68%, 7% 45%, 0 45%);
+}
+.canopy-close {
+  height: 16vh;
+  background: #071f0b;
+  clip-path: polygon(
+    0 0, 100% 0, 100% 60%, 90% 60%, 90% 85%, 80% 85%, 80% 55%, 68% 55%,
+    68% 78%, 58% 78%, 58% 50%, 47% 50%, 47% 88%, 36% 88%, 36% 58%,
+    26% 58%, 26% 75%, 16% 75%, 16% 50%, 8% 50%, 8% 70%, 0 70%);
+}
+
+.vine {
+  position: absolute;
+  top: 0;
+  width: 4px;
+  background: linear-gradient(to bottom, #071f0b, #1a4a20 70%, #2d6b30);
+  transform-origin: top center;
+  animation: sway 5s ease-in-out infinite;
+}
+.vine::after {                             /* leaf at the tip */
+  content: '';
+  position: absolute;
+  bottom: -3px; left: -5px;
+  width: 14px; height: 8px;
+  background: #2d6b30;
+  border-radius: 0 8px 0 8px;
+}
+.vine.v1 { left: calc(14vw + 15vw); height: 34vh; }
+.vine.v2 { left: calc(33vw + 15vw); height: 22vh; animation-delay: 1.2s; }
+.vine.v3 { left: calc(61vw + 15vw); height: 40vh; animation-delay: 2.4s; }
+.vine.v4 { left: calc(69vw + 15vw); height: 27vh; animation-delay: 0.6s; }
+@keyframes sway {
+  0%, 100% { transform: rotate(2.5deg); }
+  50%      { transform: rotate(-2.5deg); }
+}
+
+.fireflies {
+  position: absolute;
+  width: 4px; height: 4px;
+  background: transparent;
+  box-shadow:
+    12vw 46vh 0 #d8f060, 28vw 58vh 0 #b8e048, 44vw 40vh 0 #d8f060,
+    58vw 64vh 0 #b8e048, 72vw 50vh 0 #d8f060, 88vw 60vh 0 #b8e048,
+    20vw 72vh 0 #d8f060, 50vw 76vh 0 #b8e048, 80vw 74vh 0 #d8f060;
+  animation: twinkle 2.4s ease-in-out infinite;
+  filter: blur(0.5px);
+}
+
+.undergrowth {
+  position: absolute;
+  bottom: 0;
+  width: 100%; height: 14vh;
+  background-color: #051808;
+  clip-path: polygon(
+    0 100%, 0 40%, 5% 40%, 5% 15%, 11% 15%, 11% 45%, 19% 45%, 19% 25%,
+    26% 25%, 26% 55%, 34% 55%, 34% 20%, 41% 20%, 41% 48%, 50% 48%,
+    50% 12%, 57% 12%, 57% 42%, 65% 42%, 65% 28%, 73% 28%, 73% 52%,
+    81% 52%, 81% 18%, 88% 18%, 88% 45%, 95% 45%, 95% 30%, 100% 30%, 100% 100%);
+}
+
+.jungle-mist {
+  background: repeating-linear-gradient(90deg,
+    rgba(190, 230, 190, 0.05) 0 140px,
+    rgba(190, 230, 190, 0.11) 140px 280px);
 }
 
 /* ── CRT scanlines + vignette ─────────────────────────────────────────────── */
@@ -461,10 +708,37 @@ canvas { position: relative; z-index: 1; }
   color: #ffb74d;
   box-shadow: 4px 4px 0 #0d0416, inset 0 0 0 2px rgba(255, 183, 77, 0.35);
 }
+.w-stadium {
+  background: linear-gradient(#2a5a8a, #14304e);
+  box-shadow: 4px 4px 0 #06121e, inset 0 0 0 2px rgba(255, 250, 210, 0.35);
+}
+.w-beach {
+  background: linear-gradient(#2eb8ee, #1580b8);
+  box-shadow: 4px 4px 0 #063a54, inset 0 0 0 2px rgba(255, 238, 186, 0.45);
+}
+.w-jungle {
+  background: linear-gradient(#2d6b30, #123a1a);
+  box-shadow: 4px 4px 0 #04140a, inset 0 0 0 2px rgba(216, 240, 96, 0.3);
+}
 .w-resume {
   background: linear-gradient(#3a3a3a, #1c1c1c);
   box-shadow: 4px 4px 0 #000, inset 0 0 0 2px rgba(255, 255, 255, 0.2);
 }
+
+/* 2-column world grid (7+ buttons) */
+.btn-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 9px;
+  max-width: 320px;
+  margin: 0 auto;
+}
+.btn-grid .pixel-btn {
+  max-width: none;
+  padding: 13px 6px;
+  font-size: clamp(7px, 1.9vw, 10px);
+}
+.btn-grid .span-2 { grid-column: span 2; }
 
 /* ── In-game HUD ─────────────────────────────────────────────────────────── */
 #game-hud {

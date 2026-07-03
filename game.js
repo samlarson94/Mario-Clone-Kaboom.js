@@ -40,6 +40,9 @@ const WORLD_INFO = [
     { name: 'SUNSET',  css: 'theme-sunset' },
     { name: 'PRAIRIE', css: 'theme-prairie' },
     { name: 'SPOOKY',  css: 'theme-halloween' },
+    { name: 'STADIUM', css: 'theme-stadium' },
+    { name: 'BEACH',   css: 'theme-beach' },
+    { name: 'JUNGLE',  css: 'theme-jungle' },
 ];
 
 // ── DOM helpers & UI state ───────────────────────────────────────────────────
@@ -138,8 +141,9 @@ document.addEventListener('keydown', (e) => {
                     $id('warp-screen').style.display !== '';
     const overUp  = $id('game-over-screen').style.display === 'flex';
 
-    if ((titleUp || warpUp || overUp) && e.key >= '1' && e.key <= '4') {
-        window.startGame(parseInt(e.key) - 1);
+    const worldKey = parseInt(e.key);
+    if ((titleUp || warpUp || overUp) && worldKey >= 1 && worldKey <= WORLD_INFO.length) {
+        window.startGame(worldKey - 1);
     } else if (titleUp && e.key === 'Enter') {
         window.startGame(0);
     } else if (overUp && e.key === 'Enter') {
@@ -284,6 +288,48 @@ const MAPS = [
         '                                                                               -+   ',
         '                 z       ^  ^            z            ^   ^                    ()   ',
         '=============================   ============   ====================================',
+    ],
+    // WORLD 5 · STADIUM — sprint the gridiron, hurdle the blockers
+    [
+        '                                                                                          ',
+        '                                                                                          ',
+        '                                                                                          ',
+        '                                         %%%                                              ',
+        '                                                                                          ',
+        '            %%%               *                   %%             %                        ',
+        '                                                                                          ',
+        '                                                                                          ',
+        '                                          =                                =          -+  ',
+        '            =        =           ^        =         ^       =       ^      =    ^     ()  ',
+        '==========================================================================================',
+    ],
+    // WORLD 6 · BEACH — island hops over the surf
+    [
+        '                                                                                               ',
+        '                                                                                               ',
+        '                                                                                               ',
+        '                                                                                               ',
+        '                                                                                               ',
+        '        %                               *                %%                                    ',
+        '                                                                                               ',
+        '                              ======                                  ======                   ',
+        '                                                       =                                   -+  ',
+        '                      ^                     ^          =      ^                   ^        ()  ',
+        '===============   =============    ==============   ===================    ====================',
+    ],
+    // WORLD 7 · JUNGLE — climb the pipe-trunk trees
+    [
+        '                                                                                                    ',
+        '                                                                                                    ',
+        '                               z                                                                    ',
+        '                              ====                ====                                              ',
+        '                                                                ====                                ',
+        '              ====                           %                   ()                                 ',
+        '          *    ()                      ====                      ()                                 ',
+        '               ()                       ()                       ()                                 ',
+        '               ()                       ()                       ()                             -+  ',
+        '               ()                  z    ()     z                 ()     z                 z     ()  ',
+        '=========================   ===========================   ======================   =================',
     ],
 ];
 

@@ -12,6 +12,9 @@ CRT-flavored pixel aesthetic.
 | 2 | SUNSET | Synthwave sun, drifting dusk clouds |
 | 3 | PRAIRIE | Blue skies, pixel clouds, rolling green hills |
 | 4 | SPOOKY | Pumpkin moon, bats, a ghost, and creeping fog |
+| 5 | STADIUM | Night game: floodlights, a crowd doing the wave, yard lines |
+| 6 | BEACH | Sun, seagulls, a sailboat, rolling surf and sand |
+| 7 | JUNGLE | Layered canopy, swaying vines, fireflies, mist |
 
 ## Controls
 
@@ -20,7 +23,7 @@ CRT-flavored pixel aesthetic.
 - `Space` / `↑` / `W` — jump
 - `↓` — enter a pipe (warps to the next world)
 - `Esc` — open the Warp Zone (jump to any world, pauses enemies)
-- `1`–`4` — quick world select from any menu
+- `1`–`7` — quick world select from any menu
 
 **Touch (phones & tablets)**
 - On-screen D-pad + `A` jump button appear automatically

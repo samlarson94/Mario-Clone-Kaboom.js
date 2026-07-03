@@ -38,6 +38,25 @@
           <div class="stars-spooky"></div>
           <div class="pumpkin-moon"></div>
         </div>
+        <!-- STADIUM -->
+        <div class="scene scene-stadium">
+          <div class="floodlight fl-left"></div>
+          <div class="floodlight fl-right"></div>
+          <div class="crowd"></div>
+          <div class="crowd-wave"></div>
+        </div>
+        <!-- BEACH -->
+        <div class="scene scene-beach">
+          <div class="beach-sun"></div>
+          <div class="seagull g1"></div>
+          <div class="seagull g2"></div>
+          <div class="sailboat"></div>
+        </div>
+        <!-- JUNGLE -->
+        <div class="scene scene-jungle">
+          <div class="canopy canopy-far"></div>
+          <div class="fireflies"></div>
+        </div>
       </div>
 
       <div class="bd-layer" id="bd-near">
@@ -63,6 +82,26 @@
           <div class="ghost"></div>
           <div class="fog"></div>
         </div>
+        <!-- STADIUM -->
+        <div class="scene scene-stadium">
+          <div class="gridiron"></div>
+        </div>
+        <!-- BEACH -->
+        <div class="scene scene-beach">
+          <div class="ocean"></div>
+          <div class="sand"></div>
+          <div class="umbrella"></div>
+        </div>
+        <!-- JUNGLE -->
+        <div class="scene scene-jungle">
+          <div class="canopy canopy-close"></div>
+          <div class="vine v1"></div>
+          <div class="vine v2"></div>
+          <div class="vine v3"></div>
+          <div class="vine v4"></div>
+          <div class="undergrowth"></div>
+          <div class="fog jungle-mist"></div>
+        </div>
       </div>
     </div>
 
@@ -72,13 +111,16 @@
         <div class="deco-stars">✦ ✦ ✦ ✦ ✦</div>
         <h1 class="game-title float-anim">SUPER<br/>MARIO</h1>
         <p class="blink subtitle">— SELECT WORLD —</p>
-        <div class="btn-list">
-          <button class="pixel-btn w-space"   onclick="window.startGame(0)">✦ WORLD 1 · SPACE</button>
-          <button class="pixel-btn w-sunset"  onclick="window.startGame(1)">◗ WORLD 2 · SUNSET</button>
-          <button class="pixel-btn w-prairie" onclick="window.startGame(2)">❋ WORLD 3 · PRAIRIE</button>
-          <button class="pixel-btn w-spooky"  onclick="window.startGame(3)">◍ WORLD 4 · SPOOKY</button>
+        <div class="btn-grid">
+          <button class="pixel-btn w-space"   onclick="window.startGame(0)">1·SPACE</button>
+          <button class="pixel-btn w-sunset"  onclick="window.startGame(1)">2·SUNSET</button>
+          <button class="pixel-btn w-prairie" onclick="window.startGame(2)">3·PRAIRIE</button>
+          <button class="pixel-btn w-spooky"  onclick="window.startGame(3)">4·SPOOKY</button>
+          <button class="pixel-btn w-stadium" onclick="window.startGame(4)">5·STADIUM</button>
+          <button class="pixel-btn w-beach"   onclick="window.startGame(5)">6·BEACH</button>
+          <button class="pixel-btn w-jungle span-2" onclick="window.startGame(6)">7·JUNGLE</button>
         </div>
-        <p class="hint">← → MOVE · SPACE JUMP · ▼ PIPE · ESC WARP<br/>KEYS 1–4 QUICK SELECT</p>
+        <p class="hint">← → MOVE · SPACE JUMP · ▼ PIPE · ESC WARP<br/>KEYS 1–7 QUICK SELECT</p>
         <p class="blink insert-coin">INSERT COIN · FREE PLAY</p>
       </div>
     </div>
@@ -102,11 +144,14 @@
       <div class="overlay-inner">
         <div class="deco-stars gold">⚡ WARP ZONE ⚡</div>
         <p class="subtitle">CHOOSE YOUR WORLD</p>
-        <div class="btn-list">
-          <button class="pixel-btn w-space"   onclick="window.startGame(0)">✦ WORLD 1 · SPACE</button>
-          <button class="pixel-btn w-sunset"  onclick="window.startGame(1)">◗ WORLD 2 · SUNSET</button>
-          <button class="pixel-btn w-prairie" onclick="window.startGame(2)">❋ WORLD 3 · PRAIRIE</button>
-          <button class="pixel-btn w-spooky"  onclick="window.startGame(3)">◍ WORLD 4 · SPOOKY</button>
+        <div class="btn-grid">
+          <button class="pixel-btn w-space"   onclick="window.startGame(0)">1·SPACE</button>
+          <button class="pixel-btn w-sunset"  onclick="window.startGame(1)">2·SUNSET</button>
+          <button class="pixel-btn w-prairie" onclick="window.startGame(2)">3·PRAIRIE</button>
+          <button class="pixel-btn w-spooky"  onclick="window.startGame(3)">4·SPOOKY</button>
+          <button class="pixel-btn w-stadium" onclick="window.startGame(4)">5·STADIUM</button>
+          <button class="pixel-btn w-beach"   onclick="window.startGame(5)">6·BEACH</button>
+          <button class="pixel-btn w-jungle"  onclick="window.startGame(6)">7·JUNGLE</button>
           <button class="pixel-btn w-resume"  onclick="window.closeWarp()">► RESUME</button>
         </div>
       </div>
