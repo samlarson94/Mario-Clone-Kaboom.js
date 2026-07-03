@@ -218,10 +218,13 @@ const MUSIC = (() => {
 
 // ── World metadata (theme class drives the CSS backdrop scene) ───────────────
 const WORLD_INFO = [
-    { name: 'SPACE',   css: 'theme-space',     music: 'space' },
-    { name: 'SUNSET',  css: 'theme-sunset',    music: 'sunset' },
-    { name: 'PRAIRIE', css: 'theme-prairie',   music: 'prairie' },
-    { name: 'SPOOKY',  css: 'theme-halloween', music: 'spooky' },
+    { name: 'SPACE',   css: 'theme-space' },
+    { name: 'SUNSET',  css: 'theme-sunset' },
+    { name: 'PRAIRIE', css: 'theme-prairie' },
+    { name: 'SPOOKY',  css: 'theme-halloween' },
+    { name: 'STADIUM', css: 'theme-stadium' },
+    { name: 'BEACH',   css: 'theme-beach' },
+    { name: 'JUNGLE',  css: 'theme-jungle' },
 ];
 
 // ── DOM helpers & UI state ───────────────────────────────────────────────────
@@ -345,8 +348,9 @@ document.addEventListener('keydown', (e) => {
                     $id('warp-screen').style.display !== '';
     const overUp  = $id('game-over-screen').style.display === 'flex';
 
-    if ((titleUp || warpUp || overUp) && e.key >= '1' && e.key <= '4') {
-        window.startGame(parseInt(e.key) - 1);
+    const worldKey = parseInt(e.key);
+    if ((titleUp || warpUp || overUp) && worldKey >= 1 && worldKey <= WORLD_INFO.length) {
+        window.startGame(worldKey - 1);
     } else if (titleUp && e.key === 'Enter') {
         window.startGame(0);
     } else if (overUp && e.key === 'Enter') {
@@ -492,6 +496,48 @@ const MAPS = [
         '                 z       ^  ^            z            ^   ^                    ()   ',
         '=============================   ============   ====================================',
     ],
+    // WORLD 5 · STADIUM — sprint the gridiron, hurdle the blockers
+    [
+        '                                                                                          ',
+        '                                                                                          ',
+        '                                                                                          ',
+        '                                         %%%                                              ',
+        '                                                                                          ',
+        '            %%%               *                   %%             %                        ',
+        '                                                                                          ',
+        '                                                                                          ',
+        '                                          =                                =          -+  ',
+        '            =        =           ^        =         ^       =       ^      =    ^     ()  ',
+        '==========================================================================================',
+    ],
+    // WORLD 6 · BEACH — island hops over the surf
+    [
+        '                                                                                               ',
+        '                                                                                               ',
+        '                                                                                               ',
+        '                                                                                               ',
+        '                                                                                               ',
+        '        %                               *                %%                                    ',
+        '                                                                                               ',
+        '                              ======                                  ======                   ',
+        '                                                       =                                   -+  ',
+        '                      ^                     ^          =      ^                   ^        ()  ',
+        '===============   =============    ==============   ===================    ====================',
+    ],
+    // WORLD 7 · JUNGLE — climb the pipe-trunk trees
+    [
+        '                                                                                                    ',
+        '                                                                                                    ',
+        '                               z                                                                    ',
+        '                              ====                ====                                              ',
+        '                                                                ====                                ',
+        '              ====                           %                   ()                                 ',
+        '          *    ()                      ====                      ()                                 ',
+        '               ()                       ()                       ()                                 ',
+        '               ()                       ()                       ()                             -+  ',
+        '               ()                  z    ()     z                 ()     z                 z     ()  ',
+        '=========================   ===========================   ======================   =================',
+    ],
 ];
 
 // Built lazily — sprite() can only run once assets are loaded
@@ -507,15 +553,18 @@ const levelCfg = () => ({
     ')': [sprite('pipe-bottom-right'), solid(), scale(0.5)],
     '-': [sprite('pipe-top-left'), solid(), scale(0.5), 'pipe'],
     '+': [sprite('pipe-top-right'), solid(), scale(0.5), 'pipe'],
-    '^': [sprite('evil-shroom'), solid(), 'dangerous'],
+    '^': [sprite('evil-shroom'), solid(), body(), 'dangerous'],
     '#': [sprite('mushroom'), solid(), 'mushroom', body()],
     '!': [sprite('blue-block'), solid(), scale(0.5)],
     '/': [sprite('blue-brick'), solid(), scale(0.5)],
     's': [sprite('blue-steel'), solid(), scale(0.5)],
     '@': [sprite('blue-surprise'), solid(), scale(0.5), 'blue-coin-surprise-box'],
     'm': [sprite('blue-surprise'), solid(), scale(0.5), 'blue-mushroom-surprise'],
-    'z': [sprite('blue-evil-shroom'), solid(), scale(0.5), 'dangerous'],
+    'z': [sprite('blue-evil-shroom'), solid(), body(), scale(0.5), 'dangerous'],
 });
+
+// Static tiles a foe can stand on (everything solid except the foes themselves)
+const SOLID_TERRAIN = new Set(['=', '%', '*', '}', '(', ')', '-', '+', '!', '/', 's', '@', 'm']);
 
 // ── Scenes ───────────────────────────────────────────────────────────────────
 
@@ -540,6 +589,26 @@ scene('game', ({ level, score }) => {
     layers(['bg', 'obj', 'ui'], 'obj');
 
     const gameLevel = addLevel(MAPS[level], levelCfg());
+
+    // Solidity grid (in tile coordinates) so foes can sense walls and ledges
+    const map = MAPS[level];
+    const MAP_ROWS = map.length;
+    const solidGrid = map.map((row) => {
+        const arr = [];
+        for (let i = 0; i < row.length; i++) arr.push(SOLID_TERRAIN.has(row[i]));
+        return arr;
+    });
+    function solidAt(col, row) {
+        if (row < 0 || row >= MAP_ROWS) return false;
+        const r = solidGrid[row];
+        return col >= 0 && col < r.length && r[col];
+    }
+    // Is there any platform below this column within the world? (vs a bottomless
+    // pit that would drop a foe off the map)
+    function hasFloorBelow(col, fromRow) {
+        for (let r = fromRow; r < MAP_ROWS; r++) if (solidAt(col, r)) return true;
+        return false;
+    }
 
     // Power-up component — big for `duration` seconds, then shrink back
     function big() {
@@ -643,16 +712,41 @@ scene('game', ({ level, score }) => {
         SFX.jump();
     }
 
-    // Enemy & mushroom movement (frozen while the warp menu is open)
-    action('mushroom', (m) => {
-        if (window.__paused) return;
-        m.move(20, 0);
-    });
+    // Gravity-driven patrol: a foe walks, falls onto whatever platform is
+    // below it, turns around at walls, drops off ledges that land on a lower
+    // platform, and bounces back from ledges that would drop it off the map.
+    // (All movement is frozen while the warp menu is open.)
+    const ENEMY_SPEED = 24;
+    const SHROOM_SPEED = 20;
 
-    action('dangerous', (d) => {
+    function patrol(e, speed, startDir) {
         if (window.__paused) return;
-        d.move(-20, 0);
-    });
+        if (e.dir === undefined) e.dir = startDir;
+
+        // Only steer while grounded; mid-air, let gravity carry the drop
+        const plat = e.curPlatform && e.curPlatform();
+        if (plat && plat.gridPos) {
+            const col = plat.gridPos.x;        // tile column beneath the foe
+            const groundRow = plat.gridPos.y;  // row of that supporting tile
+            const ahead = col + e.dir;
+
+            if (solidAt(ahead, groundRow - 1)) {
+                e.dir *= -1;                                   // wall ahead
+            } else if (!solidAt(ahead, groundRow) &&
+                       !hasFloorBelow(ahead, groundRow + 1)) {
+                e.dir *= -1;                                   // off-map drop
+            }
+            // else: ledge with a platform below → walk off and fall
+        }
+
+        e.move(e.dir * speed, 0);
+
+        // Safety net: if one ever escapes the world, remove it
+        if (e.pos.y > MAP_ROWS * 20 + 240) destroy(e);
+    }
+
+    action('dangerous', (d) => patrol(d, ENEMY_SPEED, -1));
+    action('mushroom',  (m) => patrol(m, SHROOM_SPEED, 1));
 
     // Surprise boxes
     player.on('headbump', (obj) => {
