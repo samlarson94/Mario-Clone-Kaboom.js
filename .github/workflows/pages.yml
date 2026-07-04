@@ -25,6 +25,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Show repository files
+        run: |
+          echo "Listing repository root files"
+          ls -la
+          echo "Looking for index.html (show path if found)"
+          find . -maxdepth 3 -type f -name index.html -print || true
+          echo "Repository size summary"
+          du -sh . || true
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
